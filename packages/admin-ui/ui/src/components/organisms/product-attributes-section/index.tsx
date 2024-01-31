@@ -31,28 +31,15 @@ const ProductAttributesSection = ({ product }: Props) => {
       >
         <div className="gap-y-xsmall mb-large mt-base flex flex-col">
           <h2 className="inter-base-semibold">
-            {t("product-attributes-section-dimensions", "Dimensions")}
+            Parameters
           </h2>
           <div className="gap-y-xsmall flex flex-col">
-            <Attribute
-              attribute={t("product-attributes-section-height", "Height")}
-              value={product.height}
-            />
-            <Attribute
-              attribute={t("product-attributes-section-width", "Width")}
-              value={product.width}
-            />
-            <Attribute
-              attribute={t("product-attributes-section-length", "Length")}
-              value={product.length}
-            />
-            <Attribute
-              attribute={t("product-attributes-section-weight", "Weight")}
-              value={product.weight}
-            />
+            {Object.entries(product.metadata?.parameters ?? {}).map((entry) => (
+              <Attribute attribute={entry[0]} value={entry[1]} />
+            ))}
           </div>
         </div>
-        <div className="gap-y-xsmall flex flex-col">
+        {/* <div className="gap-y-xsmall flex flex-col">
           <h2 className="inter-base-semibold">
             {t("product-attributes-section-customs", "Customs")}
           </h2>
@@ -73,7 +60,7 @@ const ProductAttributesSection = ({ product }: Props) => {
               value={product.origin_country}
             />
           </div>
-        </div>
+        </div> */}
       </Section>
 
       <AttributeModal onClose={close} open={state} product={product} />

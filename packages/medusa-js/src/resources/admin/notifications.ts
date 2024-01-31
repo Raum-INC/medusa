@@ -8,6 +8,8 @@ import qs from "qs"
 import { ResponsePromise } from "../.."
 import BaseResource from "../base"
 
+
+export abstract class NotifyCustomersReqPayload { customerIds?: string[]; customerGroupIds?: string[]; channel?: string; title: string; message: string; image: string; campaignTag?: string }
 class AdminNotificationsResource extends BaseResource {
   list(
     query?: AdminGetNotificationsParams,
@@ -29,6 +31,14 @@ class AdminNotificationsResource extends BaseResource {
     customHeaders: Record<string, any> = {}
   ): ResponsePromise<AdminNotificationsRes> {
     const path = `/admin/notifications/${id}/resend`
+    return this.client.request("POST", path, payload, {}, customHeaders)
+  }
+
+  notifyCustomers(
+    payload: NotifyCustomersReqPayload,
+    customHeaders: Record<string, any> = {}
+  ): ResponsePromise<{}> {
+    const path = `/admin/push-notifications`
     return this.client.request("POST", path, payload, {}, customHeaders)
   }
 }

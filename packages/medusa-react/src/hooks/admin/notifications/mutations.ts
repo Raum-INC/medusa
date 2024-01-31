@@ -2,7 +2,7 @@ import {
   AdminNotificationsRes,
   AdminPostNotificationsNotificationResendReq,
 } from "@medusajs/medusa"
-import { Response } from "@medusajs/medusa-js"
+import { Response, NotifyCustomersReqPayload } from "@medusajs/medusa-js"
 import {
   useMutation,
   UseMutationOptions,
@@ -29,6 +29,27 @@ export const useAdminResendNotification = (
     buildOptions(
       queryClient,
       [adminNotificationKeys.lists(), adminNotificationKeys.detail(id)],
+      options
+    )
+  )
+}
+
+export const useAdminPushNotifications = (
+  options?: UseMutationOptions<
+    Response<{}>,
+    Error,
+    NotifyCustomersReqPayload
+  >
+) => {
+  const { client } = useMedusa()
+  const queryClient = useQueryClient()
+
+  return useMutation(
+    (payload: NotifyCustomersReqPayload) =>
+      client.admin.notifications.notifyCustomers(payload),
+    buildOptions(
+      queryClient,
+      [],
       options
     )
   )

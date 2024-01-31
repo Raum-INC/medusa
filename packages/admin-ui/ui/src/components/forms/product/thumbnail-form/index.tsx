@@ -1,9 +1,36 @@
-import { FieldArrayWithId, useFieldArray } from "react-hook-form"
+import { useFieldArray } from "react-hook-form"
 import { FormImage } from "../../../../types/shared"
 import { NestedForm } from "../../../../utils/nested-form"
-import FileUploadField from "../../../atoms/file-upload-field"
-import TrashIcon from "../../../fundamentals/icons/trash-icon"
-import Actionables, { ActionType } from "../../../molecules/actionables"
+
+// Import React FilePond
+import { FilePond, registerPlugin } from "react-filepond"
+
+// Import FilePond styles
+import FilePondPluginFilePoster from "filepond-plugin-file-poster"
+import "filepond-plugin-file-poster/dist/filepond-plugin-file-poster.min.css"
+import FilePondPluginFileValidateType from "filepond-plugin-file-validate-type"
+import "filepond/dist/filepond.min.css"
+import FilePondPluginImageEditor from "../../../../assets/scripts/filepond-plugin-image-editor"
+import {
+  createDefaultImageReader,
+  createDefaultImageWriter,
+  getEditorDefaults,
+  openEditor,
+  plugin_crop,
+  processImage,
+  setPlugins,
+} from "../../../../assets/scripts/pintura"
+import { useMemo } from "react"
+
+// Register the plugins
+registerPlugin(
+  /* FilePondPluginImageExifOrientation, FilePondPluginImagePreview, */
+  FilePondPluginFileValidateType,
+  FilePondPluginImageEditor,
+  FilePondPluginFilePoster
+)
+
+setPlugins(plugin_crop)
 
 export type ThumbnailFormType = {
   images: FormImage[]
@@ -21,91 +48,82 @@ const ThumbnailForm = ({ form }: Props) => {
     name: path("images"),
   })
 
-  const handleFilesChosen = (files: File[]) => {
-    const toAppend = files.map((file) => ({
-      url: URL.createObjectURL(file),
-      name: file.name,
-      size: file.size,
-      nativeFile: file,
-      selected: false,
-    }))
+  const imageEditorOptions = {
+    // Maps legacy data objects to new imageState objects (optional)
+    // legacyDataToImageState: legacyDataToImageState,
 
-    if (files.length) {
-      replace(toAppend)
-    } else {
-      append(toAppend)
-    }
+    // Used to create the editor (required)
+    createEditor: openEditor,
+
+    // Used for reading the image data. See JavaScript installation for details on the `imageReader` property (required)
+    imageReader: [createDefaultImageReader],
+
+    // Required when generating a preview thumbnail and/or output image
+    imageWriter: [createDefaultImageWriter],
+
+    // Used to create poster and output images, runs an invisible "headless" editor instance
+    imageProcessor: processImage,
+
+    // Pintura Image Editor options
+    editorOptions: {
+      // Pass the editor default configuration options
+      ...getEditorDefaults(),
+
+      // This will set a square crop aspect ratio
+      // placeholder="1200 x 1600 (3:4) recommended, up to 10MB each"
+      imageCropAspectRatio: 3 / 4,
+    },
   }
 
   return (
-    <div>
-      <div>
-        <div className="mt-large">
-          <FileUploadField
-            onFileChosen={handleFilesChosen}
-            placeholder="1200 x 1600 (3:4) recommended, up to 10MB each"
-            filetypes={["image/gif", "image/jpeg", "image/png", "image/webp"]}
-            className="py-large"
+    <div className="App">
+      {useMemo(
+        () => (
+          <FilePond
+          filePosterMaxHeight={200}
+            acceptedFileTypes={[
+              "image/gif",
+              "image/jpeg",
+              "image/png",
+              "image/webp",
+            ]}
+            server={{
+              load: (source, load, error, progress, abort, headers) => {
+                var myRequest = new Request(source)
+                fetch(myRequest).then(function (response) {
+                  response.blob().then(function (myBlob) {
+                    load(myBlob)
+                  })
+                }).catch(error)
+              },
+            }}
+            files={fields.map((field) => ({
+              options: {
+                type: "local",
+              },
+              source: field.url,
+            }))}
+            // imageEditEditor={createEditor}
+            imageEditor={imageEditorOptions}
+            // imageEditorInstantEdit={true}
+            onaddfile={(_, file) => {
+              if (_) return console.error(_)
+              replace([
+                {
+                  url: URL.createObjectURL(file.file),
+                  name: file.filename,
+                  size: file.fileSize,
+                  nativeFile: file.file as any,
+                },
+              ])
+            }}
+            allowMultiple={false}
+            name="files" /* sets the file input name, it's filepond by default */
+            labelIdle='1200 x 1600 (3:4) recommended, up to 10MB each<br/>Drag & Drop your files or <span class="filepond--label-action">Browse</span>'
           />
-        </div>
-      </div>
-      {fields.length > 0 && (
-        <div className="mt-large">
-          <h2 className="inter-large-semibold mb-small">Upload</h2>
-
-          <div className="gap-y-2xsmall flex flex-col">
-            {fields.map((field, index) => {
-              return (
-                <Image
-                  key={field.id}
-                  image={field}
-                  index={index}
-                  remove={remove}
-                />
-              )
-            })}
-          </div>
-        </div>
+        ),
+        []
       )}
-    </div>
-  )
-}
-
-type ThumbnailProps = {
-  image: FieldArrayWithId<ThumbnailFormType, "images", "id">
-  index: number
-  remove: (index: number) => void
-}
-
-const Image = ({ image, index, remove }: ThumbnailProps) => {
-  const actions: ActionType[] = [
-    {
-      label: "Delete",
-      onClick: () => remove(index),
-      icon: <TrashIcon size={20} />,
-      variant: "danger",
-    },
-  ]
-
-  return (
-    <div className="px-base py-xsmall hover:bg-grey-5 rounded-rounded group flex items-center justify-between">
-      <div className="gap-x-large flex items-center">
-        <div className="flex h-16 w-16 items-center justify-center">
-          <img
-            src={image.url}
-            alt={image.name || "Uploaded image"}
-            className="rounded-rounded max-h-[64px] max-w-[64px]"
-          />
-        </div>
-        <div className="inter-small-regular flex flex-col text-left">
-          <p>{image.name}</p>
-          <p className="text-grey-50">
-            {image.size ? `${(image.size / 1024).toFixed(2)} KB` : ""}
-          </p>
-        </div>
-      </div>
-
-      <Actionables actions={actions} forceDropdown />
     </div>
   )
 }

@@ -23,7 +23,6 @@ const GeneralForm = ({ form, requireHandle = true, isGiftCard }: Props) => {
     path,
     formState: { errors },
   } = form
-
   return (
     <div>
       <div className="gap-x-large mb-small grid grid-cols-2">

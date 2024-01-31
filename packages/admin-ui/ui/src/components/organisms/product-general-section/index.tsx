@@ -143,6 +143,10 @@ const ProductDetails = ({ product }: Props) => {
         value={product.subtitle}
       />
       <Detail
+        title={"Address"}
+        value={product.address}
+      />
+      <Detail
         title={t("product-general-section-handle", "Handle")}
         value={product.handle}
       />
@@ -153,6 +157,14 @@ const ProductDetails = ({ product }: Props) => {
       <Detail
         title={t("product-general-section-collection", "Collection")}
         value={product.collection?.title}
+      />
+      <Detail
+        title={"Safety Items"}
+        value={Object.keys(product.metadata?.safety_items ?? {"No Data": 1}).join(",")}
+      />
+      <Detail
+        title={"Facilities"}
+        value={Object.keys(product.metadata?.facilities ?? {"No Data": 1}).join(",")}
       />
       {isFeatureEnabled(FeatureFlag.PRODUCT_CATEGORIES) && (
         <Detail

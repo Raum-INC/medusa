@@ -9,42 +9,69 @@ import { useWidgets } from "../../providers/widget-provider"
 import Details from "./details"
 import CustomerGroups from "./groups"
 import CustomersPageTableHeader from "./header"
+import { useToggleState } from "@medusajs/ui"
+import BellIcon from "../../components/fundamentals/icons/bell-icon"
+import CustomerBroadcastModal from "./customer-broadcast-modal"
 
 const CustomerIndex = () => {
   const { getWidgets } = useWidgets()
 
+  const { state, open, close } = useToggleState()
+  const actions = [
+    {
+      label: "New Broadcast",
+      onClick: open,
+      icon: (
+        <span className="text-grey-90">
+          <BellIcon size={20} />
+        </span>
+      ),
+    },
+  ]
+
+  const onClose = (ev?: any) => {
+    if(ev === false) // the close event was called by a nested pintura button
+    return;
+    close();
+  }
+
   return (
-    <div className="gap-y-xsmall flex flex-col">
-      {getWidgets("customer.list.before").map((w, index) => {
-        return (
-          <WidgetContainer
-            key={index}
-            entity={null}
-            widget={w}
-            injectionZone="customer.list.before"
-          />
-        )
-      })}
+    <>
+      <div className="gap-y-xsmall flex flex-col">
+        {getWidgets("customer.list.before").map((w, index) => {
+          return (
+            <WidgetContainer
+              key={index}
+              entity={null}
+              widget={w}
+              injectionZone="customer.list.before"
+            />
+          )
+        })}
 
-      <BodyCard
-        customHeader={<CustomersPageTableHeader activeView="customers" />}
-        className="h-fit"
-      >
-        <CustomerTable />
-      </BodyCard>
+        <BodyCard
+          actionables={actions}
+          customHeader={<CustomersPageTableHeader activeView="customers" />}
+          className="h-fit"
+        >
+          <CustomerTable />
+        </BodyCard>
 
-      {getWidgets("customer.list.after").map((w, index) => {
-        return (
-          <WidgetContainer
-            key={index}
-            entity={null}
-            widget={w}
-            injectionZone="customer.list.after"
-          />
-        )
-      })}
-      <Spacer />
-    </div>
+        {getWidgets("customer.list.after").map((w, index) => {
+          return (
+            <WidgetContainer
+              key={index}
+              entity={null}
+              widget={w}
+              injectionZone="customer.list.after"
+            />
+          )
+        })}
+        <Spacer />
+      </div>
+
+      <CustomerBroadcastModal open={state} onClose={onClose} />
+    </>
   )
 }
 

@@ -19,6 +19,12 @@ import MetadataForm, {
 } from "../../forms/general/metadata-form"
 import Button from "../../fundamentals/button"
 import Modal from "../../molecules/modal"
+import LocationForm, {
+  LocationFormType,
+} from "../../forms/product/location-form"
+import FeaturesForm, {
+  FeaturesFormType,
+} from "../../forms/product/features-form"
 
 type Props = {
   product: Product
@@ -27,10 +33,12 @@ type Props = {
 }
 
 type GeneralFormWrapper = {
+  geolocation: LocationFormType
   general: GeneralFormType
   organize: OrganizeFormType
   discountable: DiscountableFormType
   metadata: MetadataFormType
+  features: FeaturesFormType
 }
 
 const GeneralModal = ({ product, open, onClose }: Props) => {
@@ -66,6 +74,12 @@ const GeneralModal = ({ product, open, onClose }: Props) => {
         subtitle: data.general.subtitle,
         // @ts-ignore
         description: data.general.description,
+        latitude: data.geolocation.latitude,
+        longitude: data.geolocation.longitude,
+        address: data.geolocation.address,
+        state_id: data.geolocation.state?.value,
+        city_id: data.geolocation.city?.value,
+        generalAddressArea: `${data.geolocation.city?.label}, ${data.geolocation.state?.label}`,
         // @ts-ignore
         type: data.organize.type
           ? {
@@ -86,7 +100,17 @@ const GeneralModal = ({ product, open, onClose }: Props) => {
           ? data.organize.categories.map((id) => ({ id }))
           : [],
         discountable: data.discountable.value,
-        metadata: getSubmittableMetadata(data.metadata),
+        metadata: {
+          ...getSubmittableMetadata(data.metadata),
+
+          parameters: data.features.parameters,
+          facilities: data.features.facilities
+            .map((facility) => ({ [facility]: 1 }))
+            .reduce((a, b) => ({ ...a, ...b })),
+          safety_items: data.features.safety_items
+            .map((safety_item) => ({ [safety_item]: 1 }))
+            .reduce((a, b) => ({ ...a, ...b })),
+        },
       },
       onReset
     )
@@ -109,6 +133,19 @@ const GeneralModal = ({ product, open, onClose }: Props) => {
               form={nestedForm(form, "general")}
               isGiftCard={product.is_giftcard}
             />
+
+            <div className="my-xlarge">
+              <h2 className="inter-base-semibold mb-base">
+                Details, Facilities & Safety Features
+              </h2>
+              <FeaturesForm form={nestedForm(form, "features")} />
+            </div>
+
+            <div className="my-xlarge">
+              <h2 className="inter-base-semibold mb-base">Location</h2>
+              <LocationForm form={nestedForm(form, "geolocation")} />
+            </div>
+
             <div className="my-xlarge">
               <h2 className="inter-base-semibold mb-base">
                 Organize{" "}
@@ -165,6 +202,11 @@ const getDefaultValues = (product: Product): GeneralFormWrapper => {
       handle: product.handle!,
       description: product.description || null,
     },
+    features: {
+      facilities: Object.keys(product.metadata?.facilities ?? {}),
+      safety_items: Object.keys(product.metadata?.safety_items ?? {}),
+      parameters: (product.metadata?.parameters as any) ?? {},
+    },
     organize: {
       collection: product.collection
         ? { label: product.collection.title, value: product.collection.id }
@@ -177,6 +219,13 @@ const getDefaultValues = (product: Product): GeneralFormWrapper => {
     },
     discountable: {
       value: product.discountable,
+    },
+    geolocation: {
+      address: product.address,
+      latitude: product.latitude,
+      longitude: product.longitude,
+      city: {value: product.city.id, label: product.city.name},
+      state: {value: product.state.id, label: product.state.name},
     },
     metadata: getMetadataFormValues(product.metadata),
   }

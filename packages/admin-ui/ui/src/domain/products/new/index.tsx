@@ -42,6 +42,10 @@ import { useFeatureFlag } from "../../../providers/feature-flag-provider"
 import { getErrorMessage } from "../../../utils/error-messages"
 import { prepareImages } from "../../../utils/images"
 import { nestedForm } from "../../../utils/nested-form"
+import LocationForm, {
+  LocationFormType,
+} from "../../../components/forms/product/location-form"
+import FeaturesForm, { FeaturesFormType } from "../../../components/forms/product/features-form"
 
 type NewProductForm = {
   general: GeneralFormType
@@ -53,6 +57,8 @@ type NewProductForm = {
   thumbnail: ThumbnailFormType
   media: MediaFormType
   salesChannels: AddSalesChannelsFormType
+  geolocation: LocationFormType
+  features: FeaturesFormType
 }
 
 type Props = {
@@ -337,7 +343,14 @@ const NewProduct = ({ onClose }: Props) => {
                   />
                 </div>
               </Accordion.Item>
-              <Accordion.Item title="Attributes" value="attributes">
+              <Accordion.Item title="Details, Facilities & Safety Features" value="facilities" required>
+                <div className="mt-large">
+                  <FeaturesForm
+                    form={nestedForm(form, "features")}
+                  />
+                </div>
+              </Accordion.Item>
+              {/* <Accordion.Item title="Attributes" value="attributes">
                 <p className="inter-base-regular text-grey-50">
                   {t(
                     "new-used-for-shipping-and-customs-purposes",
@@ -355,6 +368,17 @@ const NewProduct = ({ onClose }: Props) => {
                     {t("new-customs", "Customs")}
                   </h3>
                   <CustomsForm form={nestedForm(form, "customs")} />
+                </div>
+              </Accordion.Item> */}
+              <Accordion.Item title="Location" value="location" required>
+                <p className="inter-base-regular text-grey-50">
+                  {t(
+                    "product-location-accordion-subtitle",
+                    "The location of the property isn't revealed until a successful payment is made."
+                  )}
+                </p>
+                <div className="my-xlarge">
+                  <LocationForm form={nestedForm(form, "geolocation")} />
                 </div>
               </Accordion.Item>
               <Accordion.Item title="Thumbnail" value="thumbnail">
@@ -388,12 +412,19 @@ const createPayload = (
   publish = true,
   salesChannelsEnabled = false
 ): AdminPostProductsReq => {
+  console.error(data);
   const payload: AdminPostProductsReq = {
     title: data.general.title,
     subtitle: data.general.subtitle || undefined,
     material: data.general.material || undefined,
     handle: data.general.handle,
     discountable: data.discounted.value,
+    latitude: data.geolocation.latitude,
+    longitude: data.geolocation.longitude,
+    address: data.geolocation.address,
+    state_id: data.geolocation.state?.value,
+    city_id: data.geolocation.city?.value,
+    generalAddressArea: `${data.geolocation.city?.label}, ${data.geolocation.state?.label}`,
     is_giftcard: false,
     collection_id: data.organize.collection?.value,
     description: data.general.description || undefined,
@@ -444,7 +475,12 @@ const createPayload = (
       manage_inventory: v.stock.manage_inventory,
     })),
     // @ts-ignore
-    status: publish ? ProductStatus.PUBLISHED : ProductStatus.DRAFT,
+    status: publish ? ProductStatus.PUBLISHED : ProductStatus.DRAFT, 
+    metadata: {
+      parameters: data.features.parameters,
+      facilities:  data.features.facilities.map((facility) => ({[facility]: 1})).reduce((a, b) => ({...a, ...b})),
+      safety_items:  data.features.safety_items.map((safety_item) => ({[safety_item]: 1})).reduce((a, b) => ({...a, ...b})),
+    }
   }
 
   if (salesChannelsEnabled) {
@@ -481,6 +517,14 @@ const createBlank = (): NewProductForm => {
     },
     media: {
       images: [],
+    },
+    features: {facilities:[], safety_items: [], parameters: {area: null, baths: null, beds: null}},
+    geolocation: {
+      address: "",
+      latitude: null,
+      longitude: null,
+      state: null,
+      city: null,
     },
     organize: {
       categories: null,

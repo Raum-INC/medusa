@@ -12,7 +12,7 @@ import AdminGiftCardsResource from "./gift-cards"
 import AdminInventoryItemsResource from "./inventory-item"
 import AdminInvitesResource from "./invites"
 import AdminNotesResource from "./notes"
-import AdminNotificationsResource from "./notifications"
+import AdminNotificationsResource , {NotifyCustomersReqPayload}from "./notifications"
 import AdminOrderEditsResource from "./order-edits"
 import AdminOrdersResource from "./orders"
 import AdminPaymentCollectionsResource from "./payment-collections"
@@ -37,6 +37,8 @@ import AdminTaxRatesResource from "./tax-rates"
 import AdminUploadsResource from "./uploads"
 import AdminUsersResource from "./users"
 import AdminVariantsResource from "./variants"
+import AdminStatesResource from "./states"
+import AdminCitiesResource from "./cities"
 
 class Admin extends BaseResource {
   public auth = new AdminAuthResource(this.client)
@@ -58,6 +60,8 @@ class Admin extends BaseResource {
   public users = new AdminUsersResource(this.client)
   public returns = new AdminReturnsResource(this.client)
   public orders = new AdminOrdersResource(this.client)
+  public states = new AdminStatesResource(this.client)
+  public cities = new AdminCitiesResource(this.client)
   public orderEdits = new AdminOrderEditsResource(this.client)
   public publishableApiKeys = new AdminPublishableApiKeyResource(this.client)
   public returnReasons = new AdminReturnReasonsResource(this.client)
@@ -92,8 +96,11 @@ export {
   AdminDraftOrdersResource,
   AdminGiftCardsResource,
   AdminInvitesResource,
+  AdminStatesResource,
+  AdminCitiesResource,
   AdminNotesResource,
   AdminNotificationsResource,
+  NotifyCustomersReqPayload,
   AdminOrdersResource,
   AdminOrderEditsResource,
   AdminPriceListResource,

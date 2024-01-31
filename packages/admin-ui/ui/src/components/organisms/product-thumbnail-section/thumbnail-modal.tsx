@@ -42,7 +42,10 @@ const ThumbnailModal = ({ product, open, onClose }: Props) => {
     reset(getDefaultValues(product))
   }, [product, reset])
 
-  const onReset = () => {
+  const onReset = (ev?: any) => {
+    if(ev === false) // the close event was called by a nested pintura button
+    return;
+    
     reset(getDefaultValues(product))
     onClose()
   }
