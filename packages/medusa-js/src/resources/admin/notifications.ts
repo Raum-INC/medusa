@@ -38,7 +38,7 @@ class AdminNotificationsResource extends BaseResource {
     payload: NotifyCustomersReqPayload,
     customHeaders: Record<string, any> = {}
   ): ResponsePromise<{}> {
-    const path = `/admin/push-notifications`
+    const path = `/admin/domain/push-notifications`
     return this.client.request("POST", path, payload, {}, customHeaders)
   }
 }
