@@ -31,7 +31,7 @@ const Logo = () => {
 
 const SVG = () => {
   return (
-    <img src={'/logo.svg'}/>
+    <img src={'/public/logo.svg'}/>
   )
 }
 
