@@ -8,14 +8,14 @@ import { getWebpackConfig } from "./src/node/webpack/get-webpack-config"
 const getDevServerConfig = () => {
   const analyzeBundle = process.env.ANALYZE_BUNDLE
   const analyzeDuplicateDependencies = process.env.ANALYZE_DEPS
-
+  
   const devConfig = getWebpackConfig({
     cacheDir: __dirname,
     dest: path.resolve(__dirname, "build"),
     entry: path.resolve(__dirname, "ui", "src", "main.tsx"),
     env: "development",
     options: {
-      backend: "http://localhost:9000",
+      backend: process.env.MEDUSA_BACKEND_URL,
       path: "/",
     },
     template: path.resolve(__dirname, "ui", "index.html"),
