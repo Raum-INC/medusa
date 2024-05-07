@@ -16,12 +16,14 @@ import useNotification from "../../../../hooks/use-notification"
 import { Option } from "../../../../types/shared"
 import { getErrorMessage } from "../../../../utils/error-messages"
 import FormValidator from "../../../../utils/form-validator"
+import Switch from "../../../../components/atoms/switch"
 
 type RefundMenuFormData = {
   amount: number
   reason: Option
   no_notification: boolean
   note?: string
+  cancelBooking: boolean
 }
 
 const reasonOptions = [
@@ -69,7 +71,7 @@ const RefundMenu = ({
         amount: data.amount,
         reason: data.reason.value,
         no_notification: noNotification,
-        note: data.note,
+        note: `${data.cancelBooking ? "[CANCELLED] " : ""}${data.note}`,
       },
       {
         onSuccess: () => {
@@ -182,6 +184,24 @@ const RefundMenu = ({
                   "Discount for loyal customer"
                 )}
               />
+              <div>
+                <div className="mb-2xsmall flex items-center justify-between">
+                  <h2 className="inter-base-semibold">Cancel Booking</h2>
+                  <Controller
+                    control={control}
+                    name={"cancelBooking"}
+                    render={({ field: { value, onChange } }) => {
+                      return (
+                        <Switch checked={value} onCheckedChange={onChange} />
+                      )
+                    }}
+                  />
+                </div>
+                <p className="inter-base-regular text-grey-50">
+                  When checked, the associated booking would be cancelled as
+                  well
+                </p>
+              </div>
             </div>
           </Modal.Content>
           <Modal.Footer>

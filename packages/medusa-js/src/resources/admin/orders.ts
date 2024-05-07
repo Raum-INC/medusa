@@ -76,6 +76,26 @@ class AdminOrdersResource extends BaseResource {
     return this.client.request("POST", path, undefined, {}, customHeaders)
   }
 
+  withholdCautionFee(
+    id: string,
+    customHeaders: Record<string, any> = {}
+  ): ResponsePromise<any /* booking */> {
+    const path = `/admin/bookings/${id}/withhold-caution`
+    return this.client.request("POST", path, undefined, {}, customHeaders)
+  }
+
+  releaseCautionFeeToHost(
+    id: string,
+    payload: {
+      releaseAmount: number
+      releaseNote: string
+    },
+    customHeaders: Record<string, any> = {}
+  ): ResponsePromise<any /* booking */> {
+    const path = `/admin/bookings/${id}/release-caution-to-host`
+    return this.client.request("POST", path, payload, {}, customHeaders)
+  }
+
   refundPayment(
     id: string,
     payload: AdminPostOrdersOrderRefundsReq,

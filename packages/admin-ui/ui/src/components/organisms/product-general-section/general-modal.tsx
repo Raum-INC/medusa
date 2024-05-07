@@ -8,6 +8,7 @@ import OrganizeForm, {
 } from "../../forms/product/organize-form"
 
 import { Product } from "@medusajs/medusa"
+import { reduce } from "lodash"
 import { useEffect } from "react"
 import { useForm } from "react-hook-form"
 import useEditProductActions from "../../../hooks/use-edit-product-actions"
@@ -25,7 +26,9 @@ import LocationForm, {
 import FeaturesForm, {
   FeaturesFormType,
 } from "../../forms/product/features-form"
-
+import { PricesFormType } from "../../forms/general/prices-form"
+import { entries } from "lodash"
+import CautionFeesForm from "../../forms/product/caution-fees-form"
 type Props = {
   product: Product
   open: boolean
@@ -38,6 +41,7 @@ type GeneralFormWrapper = {
   organize: OrganizeFormType
   discountable: DiscountableFormType
   metadata: MetadataFormType
+  cautionFees: PricesFormType
   features: FeaturesFormType
 }
 
@@ -100,16 +104,26 @@ const GeneralModal = ({ product, open, onClose }: Props) => {
           ? data.organize.categories.map((id) => ({ id }))
           : [],
         discountable: data.discountable.value,
+        cautionFees: reduce(
+          data.cautionFees.prices.map((entry) => ({
+            [`prices_${entry.currency_code}`]: entry.amount,
+          })),
+          (a, b) => ({ ...a, ...b })
+        ),
         metadata: {
           ...getSubmittableMetadata(data.metadata),
 
           parameters: data.features.parameters,
-          facilities: data.features.facilities
-            .map((facility) => ({ [facility]: 1 }))
-            .reduce((a, b) => ({ ...a, ...b })),
-          safety_items: data.features.safety_items
-            .map((safety_item) => ({ [safety_item]: 1 }))
-            .reduce((a, b) => ({ ...a, ...b })),
+          facilities: reduce(
+            data.features.facilities.map((facility) => ({ [facility]: 1 })),
+            (a, b) => ({ ...a, ...b })
+          ),
+          safety_items: reduce(
+            data.features.safety_items.map((safety_item) => ({
+              [safety_item]: 1,
+            })),
+            (a, b) => ({ ...a, ...b })
+          ),
         },
       },
       onReset
@@ -159,6 +173,14 @@ const GeneralModal = ({ product, open, onClose }: Props) => {
               form={nestedForm(form, "discountable")}
               isGiftCard={product.is_giftcard}
             />
+
+            <div className="mt-xlarge">
+              <h2 className="inter-base-semibold mb-2xsmall">
+                {'Caution Fees'}
+              </h2>
+              <CautionFeesForm form={nestedForm(form, "cautionFees")} />
+            </div>
+
             <div className="mt-xlarge">
               <h2 className="inter-base-semibold mb-base">
                 {t("product-general-section-metadata", "Metadata")}
@@ -224,11 +246,20 @@ const getDefaultValues = (product: Product): GeneralFormWrapper => {
       address: product.address,
       latitude: product.latitude,
       longitude: product.longitude,
-      city: {value: product.city.id, label: product.city.name},
-      state: {value: product.state.id, label: product.state.name},
+      city: { value: product.city.id, label: product.city.name },
+      state: { value: product.state.id, label: product.state.name },
     },
     metadata: getMetadataFormValues(product.metadata),
-  }
+    cautionFees: {
+      prices: entries(product.cautionFees).map((entry) => ({
+        id: entry[0],
+        includes_tax: false,
+        currency_code: entry[0].split("_")[1],
+        region_id: null,
+        amount: entry[1],
+      })),
+    },
+  };
 }
 
 export default GeneralModal

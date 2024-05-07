@@ -1,6 +1,7 @@
 import { AdminPostProductsReq, ProductVariant } from "@medusajs/medusa"
 import { useAdminCreateProduct, useMedusa } from "medusa-react"
 import { useForm, useWatch } from "react-hook-form"
+import {reduce} from 'lodash'
 import CustomsForm, {
   CustomsFormType,
 } from "../../../components/forms/product/customs-form"
@@ -45,7 +46,10 @@ import { nestedForm } from "../../../utils/nested-form"
 import LocationForm, {
   LocationFormType,
 } from "../../../components/forms/product/location-form"
-import FeaturesForm, { FeaturesFormType } from "../../../components/forms/product/features-form"
+import FeaturesForm, {
+  FeaturesFormType,
+} from "../../../components/forms/product/features-form"
+import CautionFeesForm from "../../../components/forms/product/caution-fees-form"
 
 type NewProductForm = {
   general: GeneralFormType
@@ -59,6 +63,7 @@ type NewProductForm = {
   salesChannels: AddSalesChannelsFormType
   geolocation: LocationFormType
   features: FeaturesFormType
+  cautionFees: PricesFormType
 }
 
 type Props = {
@@ -298,6 +303,13 @@ const NewProduct = ({ onClose }: Props) => {
                     requireHandle={false}
                   />
                   <DiscountableForm form={nestedForm(form, "discounted")} />
+
+                  <div className="mt-xlarge">
+                    <h2 className="inter-base-semibold mb-2xsmall">
+                      {"Caution Fees"}
+                    </h2>
+                    <CautionFeesForm form={nestedForm(form, "cautionFees")} />
+                  </div>
                 </div>
               </Accordion.Item>
               <Accordion.Item title="Organize" value="organize">
@@ -343,11 +355,13 @@ const NewProduct = ({ onClose }: Props) => {
                   />
                 </div>
               </Accordion.Item>
-              <Accordion.Item title="Details, Facilities & Safety Features" value="facilities" required>
+              <Accordion.Item
+                title="Details, Facilities & Safety Features"
+                value="facilities"
+                required
+              >
                 <div className="mt-large">
-                  <FeaturesForm
-                    form={nestedForm(form, "features")}
-                  />
+                  <FeaturesForm form={nestedForm(form, "features")} />
                 </div>
               </Accordion.Item>
               {/* <Accordion.Item title="Attributes" value="attributes">
@@ -412,7 +426,7 @@ const createPayload = (
   publish = true,
   salesChannelsEnabled = false
 ): AdminPostProductsReq => {
-  console.error(data);
+  console.error(data)
   const payload: AdminPostProductsReq = {
     title: data.general.title,
     subtitle: data.general.subtitle || undefined,
@@ -475,12 +489,22 @@ const createPayload = (
       manage_inventory: v.stock.manage_inventory,
     })),
     // @ts-ignore
-    status: publish ? ProductStatus.PUBLISHED : ProductStatus.DRAFT, 
+    status: publish ? ProductStatus.PUBLISHED : ProductStatus.DRAFT,
+    cautionFees: reduce(
+      data.cautionFees.prices.map((entry) => ({
+        [`prices_${entry.currency_code}`]: entry.amount,
+      })),
+      (a, b) => ({ ...a, ...b })
+    ) as any,
     metadata: {
       parameters: data.features.parameters,
-      facilities:  data.features.facilities.map((facility) => ({[facility]: 1})).reduce((a, b) => ({...a, ...b})),
-      safety_items:  data.features.safety_items.map((safety_item) => ({[safety_item]: 1})).reduce((a, b) => ({...a, ...b})),
-    }
+      facilities: data.features.facilities
+        .map((facility) => ({ [facility]: 1 }))
+        .reduce((a, b) => ({ ...a, ...b })),
+      safety_items: data.features.safety_items
+        .map((safety_item) => ({ [safety_item]: 1 }))
+        .reduce((a, b) => ({ ...a, ...b })),
+    },
   }
 
   if (salesChannelsEnabled) {
@@ -518,7 +542,14 @@ const createBlank = (): NewProductForm => {
     media: {
       images: [],
     },
-    features: {facilities:[], safety_items: [], parameters: {area: null, baths: null, beds: null}},
+    features: {
+      facilities: [],
+      safety_items: [],
+      parameters: { area: null, baths: null, beds: null },
+    },
+    cautionFees: {
+      prices: []
+    },
     geolocation: {
       address: "",
       latitude: null,

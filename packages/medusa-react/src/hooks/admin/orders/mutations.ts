@@ -58,6 +58,53 @@ export const useAdminCancelOrder = (
   )
 }
 
+export const useAdminWithholdCautionFee = (
+  id: string,
+  options?: UseMutationOptions<
+    Response<AdminOrdersRes>,
+    Error,
+    void
+  >
+) => {
+  const { client } = useMedusa()
+  const queryClient = useQueryClient()
+
+  return useMutation(
+    () =>
+      client.admin.orders.withholdCautionFee(id),
+    buildOptions(
+      queryClient,
+      [adminOrderKeys.lists(), adminOrderKeys.detail(id)],
+      options
+    )
+  )
+}
+
+export const useAdminReleaseCautionFeeToHost = (
+  id: string,
+  options?: UseMutationOptions<
+    Response<AdminOrdersRes>,
+    Error,
+    {
+      releaseAmount: number
+      releaseNote: string
+    }
+  >
+) => {
+  const { client } = useMedusa()
+  const queryClient = useQueryClient()
+
+  return useMutation(
+    (payload: { releaseAmount: number; releaseNote: string }) =>
+      client.admin.orders.releaseCautionFeeToHost(id, payload),
+    buildOptions(
+      queryClient,
+      [adminOrderKeys.lists(), adminOrderKeys.detail(id)],
+      options
+    )
+  )
+}
+
 export const useAdminCompleteOrder = (
   id: string,
   options?: UseMutationOptions<Response<AdminOrdersRes>, Error, void>

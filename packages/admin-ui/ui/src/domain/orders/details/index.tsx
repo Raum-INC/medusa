@@ -12,6 +12,7 @@ import {
   useAdminRegion,
   useAdminReservations,
   useAdminUpdateOrder,
+  useAdminWithholdCautionFee,
 } from "medusa-react"
 import { useNavigate, useParams } from "react-router-dom"
 import OrderEditProvider, { OrderEditContext } from "../edit/context"
@@ -69,6 +70,10 @@ import SummaryCard from "./detail-cards/summary"
 import EmailModal from "./email-modal"
 import MarkShippedModal from "./mark-shipped"
 import CreateRefundModal from "./refund"
+import LockIcon from "../../../components/fundamentals/icons/lock-icon"
+import { LockClosedSolid, LockOpenSolid } from "@medusajs/icons"
+import ReleaseCautionFeeModal from "./release-caution-to-host"
+import StatusDot from "../../../components/fundamentals/status-indicator"
 
 type OrderDetailFulfillment = {
   title: string
@@ -143,6 +148,10 @@ const OrderDetails = () => {
 
   const { state: showTransferOrderModal, toggle: toggleTransferOrderModal } =
     useToggleState()
+  const {
+    state: showReleaseCautionFeeModal,
+    toggle: toggleReleaseCautionFeeModal,
+  } = useToggleState()
 
   const [showFulfillment, setShowFulfillment] = useState(false)
   const [showRefund, setShowRefund] = useState(false)
@@ -152,6 +161,7 @@ const OrderDetails = () => {
 
   const capturePayment = useAdminCapturePayment(id!)
   const cancelOrder = useAdminCancelOrder(id!)
+  const witholdCautionFee = useAdminWithholdCautionFee(id!)
 
   const {
     state: addressModalState,
@@ -246,6 +256,23 @@ const OrderDetails = () => {
           getErrorMessage(err),
           "error"
         ),
+    })
+  }
+
+  const handleWithholdCautionFee = async () => {
+    const shouldWithhold = await dialog({
+      heading: "Withhold Caution Fee",
+      text: "Are you sure you want to withhold the caution fee?\nYou'd be responsible for handling releases and refunds\nDon't forget to create a note in the timeline for the customer to see",
+    })
+
+    if (!shouldWithhold) {
+      return
+    }
+
+    return witholdCautionFee.mutate(undefined, {
+      onSuccess: () =>
+        notification("Success", "Successfully withheld caution fee", "success"),
+      onError: (err) => notification("Error", getErrorMessage(err), "error"),
     })
   }
 
@@ -359,7 +386,13 @@ const OrderDetails = () => {
                   subtitle={moment(order.created_at).format(
                     "D MMMM YYYY hh:mm a"
                   )}
-                  status={<OrderStatusComponent status={order.status} />}
+                  status={<>
+                  {order.booking![0].cautionFeeWithHeld &&
+                    <StatusDot
+                      title={"Caution fee withheld"}
+                      variant="danger"
+                    />}
+                    <OrderStatusComponent status={order.status} /></>}
                   forceDropdown={true}
                   actionables={[
                     {
@@ -367,6 +400,17 @@ const OrderDetails = () => {
                       icon: <CancelIcon size={"20"} />,
                       variant: "danger",
                       onClick: () => handleDeleteOrder(),
+                    },
+                    {
+                      label: "Withhold Caution Fee",
+                      icon: <LockClosedSolid />,
+                      variant: "danger",
+                      onClick: () => handleWithholdCautionFee(),
+                    },
+                    {
+                      label: "Release Caution Fee to Host",
+                      icon: <LockOpenSolid />,
+                      onClick: () => toggleReleaseCautionFeeModal(),
                     },
                   ]}
                 >
@@ -619,6 +663,7 @@ const OrderDetails = () => {
             {showRefund && (
               <CreateRefundModal
                 order={order}
+                initialReason={"other"}
                 onDismiss={() => setShowRefund(false)}
               />
             )}
@@ -626,6 +671,13 @@ const OrderDetails = () => {
               <TransferOrdersModal
                 order={order}
                 onDismiss={toggleTransferOrderModal}
+              />
+            )}
+            {showReleaseCautionFeeModal && (
+              <ReleaseCautionFeeModal
+                order={order}
+                initialAmount={order.booking![0].cautionFeePaid}
+                onDismiss={toggleReleaseCautionFeeModal}
               />
             )}
             {fullfilmentToShip && (

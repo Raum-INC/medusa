@@ -8,10 +8,17 @@ export declare module "@medusajs/medusa/dist/api/routes/admin/products/create-pr
         state_id?: number | null;
         city_id?: number | null;
         generalAddressArea?: string;
+        cautionFees?: Record<string, number>|null;
     }
+}
+export declare module "@medusajs/medusa/dist/models/order" {
+  declare interface Order {
+    booking?: /* ProductBooking */{id: string, cautionFeePaid: number, cautionFeeWithHeld: boolean}[];
+  }
 }
 export declare module "@medusajs/medusa/dist/models/product" {
     declare interface Product {
+        cautionFees: Record<string, number>;
         generalAddressArea: string;
         address: string;
         latitude: number;
