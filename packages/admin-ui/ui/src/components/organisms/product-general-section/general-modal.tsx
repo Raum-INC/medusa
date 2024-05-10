@@ -246,8 +246,8 @@ const getDefaultValues = (product: Product): GeneralFormWrapper => {
       address: product.address,
       latitude: product.latitude,
       longitude: product.longitude,
-      city: { value: product.city.id, label: product.city.name },
-      state: { value: product.state.id, label: product.state.name },
+      city: product.city ? { value: product.city.id, label: product.city.name }:null,
+      state: product.state ? { value: product.state.id, label: product.state.name }:null,
     },
     metadata: getMetadataFormValues(product.metadata),
     cautionFees: {

@@ -13,7 +13,11 @@ export declare module "@medusajs/medusa/dist/api/routes/admin/products/create-pr
 }
 export declare module "@medusajs/medusa/dist/models/order" {
   declare interface Order {
-    booking?: /* ProductBooking */{id: string, cautionFeePaid: number, cautionFeeWithHeld: boolean}[];
+    booking?: /* ProductBooking */{id: string, cautionFeePaid: number, cautionFeeWithHeld: boolean, 
+
+      bookingStartDate: string,
+      bookingEndDate: string,
+    }[];
   }
 }
 export declare module "@medusajs/medusa/dist/models/product" {

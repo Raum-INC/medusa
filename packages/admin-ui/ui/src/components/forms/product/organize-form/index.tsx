@@ -13,7 +13,7 @@ import {
 } from "../../../molecules/select/next-select"
 import TagInput from "../../../molecules/tag-input"
 import useOrganizeData from "./use-organize-data"
-
+import {reduce} from 'lodash';
 export type OrganizeFormType = {
   type: Option | null
   collection: Option | null
@@ -93,7 +93,8 @@ const OrganizeForm = ({ form }: Props) => {
             name={path("categories")}
             control={control}
             render={({ field: { value, onChange } }) => {
-              const initiallySelected = (value || []).reduce((acc, val) => {
+
+              const initiallySelected = reduce(value || [], (acc, val) => {
                 acc[val] = true
                 return acc
               }, {} as Record<string, true>)

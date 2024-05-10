@@ -387,7 +387,7 @@ const OrderDetails = () => {
                     "D MMMM YYYY hh:mm a"
                   )}
                   status={<>
-                  {order.booking![0].cautionFeeWithHeld &&
+                  {order.booking && order.booking![0].cautionFeeWithHeld &&
                     <StatusDot
                       title={"Caution fee withheld"}
                       variant="danger"
@@ -401,17 +401,17 @@ const OrderDetails = () => {
                       variant: "danger",
                       onClick: () => handleDeleteOrder(),
                     },
-                    {
+                    ...(order.booking && order.booking![0] ? [{
                       label: "Withhold Caution Fee",
                       icon: <LockClosedSolid />,
                       variant: "danger",
                       onClick: () => handleWithholdCautionFee(),
-                    },
-                    {
+                    }]:[]),
+                    ...(order.booking && order.booking![0] ? [{
                       label: "Release Caution Fee to Host",
                       icon: <LockOpenSolid />,
                       onClick: () => toggleReleaseCautionFeeModal(),
-                    },
+                    }]:[]),
                   ]}
                 >
                   <div className="mt-6 flex space-x-6 divide-x">
@@ -443,6 +443,18 @@ const OrderDetails = () => {
                           .join(", ")}
                       </div>
                     </div>
+                    {order.booking && order.booking.length > 0 && <div className="flex flex-col pl-6">
+                      <div className="inter-smaller-regular text-grey-50 mb-1">
+                        Check-in / Check-out
+                      </div>
+                      <div>{
+                        `${moment(order.booking[0]!.bookingStartDate).format(
+                          "DD MMM YYYY"
+                        )} / 
+                        ${moment(order.booking[0]!.bookingEndDate).format(
+                          "DD MMM YYYY"
+                        )}`}</div>
+                    </div>}
                   </div>
                 </BodyCard>
 

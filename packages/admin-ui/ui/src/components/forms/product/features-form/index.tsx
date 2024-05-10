@@ -8,7 +8,7 @@ import { Icon } from "@radix-ui/react-select"
 import { Store } from "@medusajs/medusa/dist/models"
 import InputHeader from "../../../fundamentals/input-header"
 import NestedMultiselect from "../../../../domain/categories/components/multiselect"
-
+import {reduce} from 'lodash';
 export type FeaturesFormType = {
   parameters: Record<"beds" | "baths" | "area", number|null>
   facilities: string[]
@@ -82,7 +82,7 @@ const FeaturesForm = ({ form }: FacilitiesFormProps) => {
             name={path("facilities")}
             control={control}
             render={({ field: { value, onChange } }) => {
-              const initiallySelected = (value || []).reduce((acc, val) => {
+              const initiallySelected = reduce(value || [], (acc, val) => {
                 acc[val] = true
                 return acc
               }, {} as Record<string, true>)
@@ -110,7 +110,7 @@ const FeaturesForm = ({ form }: FacilitiesFormProps) => {
             name={path("safety_items")}
             control={control}
             render={({ field: { value, onChange } }) => {
-              const initiallySelected = (value || []).reduce((acc, val) => {
+              const initiallySelected = reduce(value || [], (acc, val) => {
                 acc[val] = true
                 return acc
               }, {} as Record<string, true>)

@@ -252,9 +252,14 @@ const SummaryCard: React.FC<SummaryCardProps> = ({ order, reservations }) => {
         />
         <DisplayTotal
           currency={order.currency_code}
-          totalAmount={order.tax_total}
+          totalAmount={(order.tax_total ?? 0) - (order.booking && order.booking.length > 0 ?order.booking[0].cautionFeePaid:0 )}
           totalTitle={t("detail-cards-tax", "Tax")}
         />
+        {order.booking && order.booking.length > 0 && <DisplayTotal
+          currency={order.currency_code}
+          totalAmount={order.booking[0].cautionFeePaid}
+          totalTitle={"Caution Fee Paid"}
+        />}
         <DisplayTotal
           variant={"large"}
           currency={order.currency_code}

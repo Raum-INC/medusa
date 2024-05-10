@@ -18,7 +18,7 @@ import { omit, pick } from "lodash"
 import InputHeader from "../../components/fundamentals/input-header"
 import { ProductTag } from "@medusajs/client-types"
 import NestedMultiselect from "../categories/components/multiselect"
-
+import {reduce} from 'lodash'
 type AccountDetailsFormData = {
   name: string
   swap_link_template: string | undefined
@@ -192,13 +192,12 @@ const AccountDetails = () => {
                   name={"curation_tags"}
                   control={control}
                   render={({ field: { value, onChange } }) => {
-                    const initiallySelected = (value || []).reduce(
-                      (acc, val) => {
-                        acc[val] = true
-                        return acc
-                      },
-                      {} as Record<string, true>
-                    )
+
+              const initiallySelected = reduce(value || [], (acc, val) => {
+                acc[val] = true
+                return acc
+              }, {} as Record<string, true>)
+
                     console.error("initially selected", initiallySelected)
                     return (
                       <NestedMultiselect

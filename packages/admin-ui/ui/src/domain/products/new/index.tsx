@@ -1,7 +1,7 @@
 import { AdminPostProductsReq, ProductVariant } from "@medusajs/medusa"
 import { useAdminCreateProduct, useMedusa } from "medusa-react"
 import { useForm, useWatch } from "react-hook-form"
-import {reduce} from 'lodash'
+import { reduce } from "lodash"
 import CustomsForm, {
   CustomsFormType,
 } from "../../../components/forms/product/customs-form"
@@ -498,12 +498,14 @@ const createPayload = (
     ) as any,
     metadata: {
       parameters: data.features.parameters,
-      facilities: data.features.facilities
-        .map((facility) => ({ [facility]: 1 }))
-        .reduce((a, b) => ({ ...a, ...b })),
-      safety_items: data.features.safety_items
-        .map((safety_item) => ({ [safety_item]: 1 }))
-        .reduce((a, b) => ({ ...a, ...b })),
+      facilities: reduce(
+        data.features.facilities.map((facility) => ({ [facility]: 1 })),
+        (a, b) => ({ ...a, ...b })
+      ),
+      safety_items: reduce(
+        data.features.safety_items.map((safety_item) => ({ [safety_item]: 1 })),
+        (a, b) => ({ ...a, ...b })
+      ),
     },
   }
 
@@ -548,7 +550,7 @@ const createBlank = (): NewProductForm => {
       parameters: { area: null, baths: null, beds: null },
     },
     cautionFees: {
-      prices: []
+      prices: [],
     },
     geolocation: {
       address: "",
