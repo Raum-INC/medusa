@@ -1,7 +1,7 @@
 import { Customer } from "@medusajs/medusa"
 import { useAdminUpdateCustomer } from "medusa-react"
 import { useEffect } from "react"
-import { useForm } from "react-hook-form"
+import { Controller, useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import MetadataForm, {
   getMetadataFormValues,
@@ -16,16 +16,22 @@ import useNotification from "../../../hooks/use-notification"
 import { getErrorMessage } from "../../../utils/error-messages"
 import { nestedForm } from "../../../utils/nested-form"
 import { validateEmail } from "../../../utils/validate-email"
+import { NextSelect } from "../../../components/molecules/select/next-select"
 
 type EditCustomerModalProps = {
   customer: Customer
   handleClose: () => void
 }
 
+type CustomerType ={
+    value: "default" | "host"
+    label: string
+}
 type EditCustomerFormType = {
   first_name: string
   last_name: string
   email: string
+  type: CustomerType
   phone: string | null
   metadata: MetadataFormType
 }
@@ -43,7 +49,7 @@ const EditCustomerModal = ({
   const {
     register,
     reset,
-    handleSubmit,
+    handleSubmit,control,
     formState: { isDirty },
   } = form
 
@@ -56,6 +62,7 @@ const EditCustomerModal = ({
       {
         first_name: data.first_name,
         last_name: data.last_name,
+        type: data.type.value,
         // @ts-ignore
         phone: data.phone,
         email: data.email,
@@ -89,6 +96,13 @@ const EditCustomerModal = ({
     reset(getDefaultValues(customer))
   }, [customer])
 
+
+  const customerTypeOptions: CustomerType[] = [
+    { value: "default", label:"Default"},
+    { value: "host", label: "Host" },
+  ]
+
+
   return (
     <Modal handleClose={handleClose}>
       <Modal.Body>
@@ -113,6 +127,27 @@ const EditCustomerModal = ({
                   label={t("details-last-name", "Last Name")}
                   {...register("last_name")}
                   placeholder={t("details-james", "James")}
+                />
+                <Controller
+                  name="type"
+                  control={control}
+                  defaultValue={{
+                    label: "Default",
+                    value: "default",
+                  }}
+                  render={({ field: { value, onChange, onBlur, ref } }) => {
+                    return (
+                      <NextSelect
+                        label={"Type"}
+                        placeholder={"Select user type"}
+                        onBlur={onBlur}
+                        ref={ref}
+                        onChange={onChange}
+                        options={customerTypeOptions}
+                        value={value}
+                      />
+                    )
+                  }}
                 />
               </div>
             </div>
@@ -179,6 +214,7 @@ const getDefaultValues = (customer: Customer): EditCustomerFormType => {
     first_name: customer.first_name,
     email: customer.email,
     last_name: customer.last_name,
+    type: customer.type,
     phone: customer.phone,
     metadata: getMetadataFormValues(customer.metadata),
   }
