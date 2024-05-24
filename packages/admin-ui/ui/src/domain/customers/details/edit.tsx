@@ -33,6 +33,7 @@ type EditCustomerFormType = {
   email: string
   type: CustomerType
   phone: string | null
+  allowedPayoutBankHolderName: string | null
   metadata: MetadataFormType
 }
 
@@ -43,7 +44,7 @@ const EditCustomerModal = ({
   const { t } = useTranslation()
 
   const form = useForm<EditCustomerFormType>({
-    defaultValues: getDefaultValues(customer),
+    defaultValues: getDefaultValues(customer as any),
   })
 
   const {
@@ -63,6 +64,7 @@ const EditCustomerModal = ({
         first_name: data.first_name,
         last_name: data.last_name,
         type: data.type.value,
+        allowedPayoutBankHolderName: data.allowedPayoutBankHolderName,
         // @ts-ignore
         phone: data.phone,
         email: data.email,
@@ -93,7 +95,7 @@ const EditCustomerModal = ({
   })
 
   useEffect(() => {
-    reset(getDefaultValues(customer))
+    reset(getDefaultValues(customer as any))
   }, [customer])
 
 
@@ -127,6 +129,11 @@ const EditCustomerModal = ({
                   label={t("details-last-name", "Last Name")}
                   {...register("last_name")}
                   placeholder={t("details-james", "James")}
+                />
+                <InputField
+                  label={"Allowed Bank Holder Name"}
+                  {...register("allowedPayoutBankHolderName")}
+                  placeholder={'MONIEPOINT RAUM DEVELOPMENT LTD.'}
                 />
                 <Controller
                   name="type"
@@ -209,12 +216,13 @@ const EditCustomerModal = ({
   )
 }
 
-const getDefaultValues = (customer: Customer): EditCustomerFormType => {
+const getDefaultValues = (customer: Customer &{type?: any,allowedPayoutBankHolderName: string }): EditCustomerFormType => {
   return {
     first_name: customer.first_name,
     email: customer.email,
     last_name: customer.last_name,
     type: customer.type,
+    allowedPayoutBankHolderName: customer.allowedPayoutBankHolderName,
     phone: customer.phone,
     metadata: getMetadataFormValues(customer.metadata),
   }
