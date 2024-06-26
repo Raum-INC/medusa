@@ -17,6 +17,7 @@ import { getErrorMessage } from "../../../utils/error-messages"
 import { nestedForm } from "../../../utils/nested-form"
 import { validateEmail } from "../../../utils/validate-email"
 import { NextSelect } from "../../../components/molecules/select/next-select"
+import {capitalize} from 'lodash';
 
 type EditCustomerModalProps = {
   customer: Customer
@@ -143,6 +144,7 @@ const EditCustomerModal = ({
                     value: "default",
                   }}
                   render={({ field: { value, onChange, onBlur, ref } }) => {
+                    
                     return (
                       <NextSelect
                         label={"Type"}
@@ -221,7 +223,7 @@ const getDefaultValues = (customer: Customer &{type?: any,allowedPayoutBankHolde
     first_name: customer.first_name,
     email: customer.email,
     last_name: customer.last_name,
-    type: customer.type,
+    type: {value: customer.type??'default', label: capitalize(customer.type ?? 'default')},
     allowedPayoutBankHolderName: customer.allowedPayoutBankHolderName,
     phone: customer.phone,
     metadata: getMetadataFormValues(customer.metadata),

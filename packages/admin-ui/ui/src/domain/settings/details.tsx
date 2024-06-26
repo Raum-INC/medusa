@@ -5,7 +5,7 @@ import {
   useAdminUpdateStore,
   useProductTags,
 } from "medusa-react"
-import { useEffect } from "react"
+import { useEffect, useMemo } from "react"
 import { Controller, useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import BackButton from "../../components/atoms/back-button"
@@ -18,7 +18,7 @@ import { omit, pick } from "lodash"
 import InputHeader from "../../components/fundamentals/input-header"
 import { ProductTag } from "@medusajs/client-types"
 import NestedMultiselect from "../categories/components/multiselect"
-import {reduce} from 'lodash'
+import { reduce } from "lodash"
 type AccountDetailsFormData = {
   name: string
   swap_link_template: string | undefined
@@ -186,37 +186,47 @@ const AccountDetails = () => {
             <div>
               <h2 className="inter-base-semibold mb-base">{"Metadata"}</h2>
 
-              <div>
-                <InputHeader label="Curation Tags" className="mb-2" />
-                <Controller
-                  name={"curation_tags"}
-                  control={control}
-                  render={({ field: { value, onChange } }) => {
+              {useMemo(
+                () => (
+                  <div>
+                    <InputHeader label="Curation Tags" className="mb-2" />
+                    <Controller
+                      name={"curation_tags"}
+                      control={control}
+                      defaultValue={(store?.metadata?.curation_tags as any)?.map((ct: any) => ct.id)}
+                      render={({ field: { value, onChange } }) => {
+                        console.error(value)
+                        const initiallySelected = reduce(
+                          value || [],
+                          (acc, val) => {
+                            acc[val] = true
+                            return acc
+                          },
+                          {} as Record<string, true>
+                        )
 
-              const initiallySelected = reduce(value || [], (acc, val) => {
-                acc[val] = true
-                return acc
-              }, {} as Record<string, true>)
-
-                    console.error("initially selected", initiallySelected)
-                    return (
-                      <NestedMultiselect
-                        placeholder={
-                          !!product_tags?.length
-                            ? "Choose Curation Tags"
-                            : "No Curation Tags available"
-                        }
-                        onSelect={onChange}
-                        options={(product_tags ?? []).map((tag) => ({
-                          label: tag.value,
-                          value: tag.id,
-                        }))}
-                        initiallySelected={initiallySelected}
-                      />
-                    )
-                  }}
-                />
-              </div>
+                        console.error("initially selected", initiallySelected)
+                        return (
+                          <NestedMultiselect
+                            placeholder={
+                              !!product_tags?.length
+                                ? "Choose Curation Tags"
+                                : "No Curation Tags available"
+                            }
+                            onSelect={onChange}
+                            options={(product_tags ?? []).map((tag) => ({
+                              label: tag.value,
+                              value: tag.id,
+                            }))}
+                            initiallySelected={initiallySelected}
+                          />
+                        )
+                      }}
+                    />
+                  </div>
+                ),
+                [product_tags]
+              )}
               <div className="mb-large" />
               <Controller
                 control={control}

@@ -82,10 +82,13 @@ const FeaturesForm = ({ form }: FacilitiesFormProps) => {
             name={path("facilities")}
             control={control}
             render={({ field: { value, onChange } }) => {
+              console.error(value);
+
               const initiallySelected = reduce(value || [], (acc, val) => {
                 acc[val] = true
                 return acc
               }, {} as Record<string, true>)
+                    console.error("initially selected", initiallySelected)
 
               return (
                 <NestedMultiselect
