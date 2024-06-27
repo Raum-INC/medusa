@@ -9,7 +9,7 @@ import { ResponsePromise } from "../.."
 import BaseResource from "../base"
 
 
-export abstract class NotifyCustomersReqPayload { customerIds?: string[]; customerGroupIds?: string[]; channel?: string; title: string; message: string; image: string; campaignTag?: string }
+export abstract class NotifyCustomersReqPayload { customerIds?: string[]; customerGroupIds?: string[]; channel?: string; title: string; message: string; image: string; campaignTag?: string; link?: string }
 class AdminNotificationsResource extends BaseResource {
   list(
     query?: AdminGetNotificationsParams,

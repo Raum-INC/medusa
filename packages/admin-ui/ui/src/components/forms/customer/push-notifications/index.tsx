@@ -47,6 +47,7 @@ export type PushNotificationFormType = {
   customerIds?: string[]
   customerGroupIds?: string[]
   channel?: string
+  link?: string
   images?: FormImage[]
 }
 
@@ -219,6 +220,15 @@ const PushNotificationForm = ({ form }: PushNotificationFormProps) => {
             placeholder="general"
             type="text"
             {...register(path("channel"), {})}
+            errors={errors}
+          />
+        </div>
+        <div className="gap-large col-span-2 grid grid-cols-1">
+          <InputField
+            label="Deeplink"
+            placeholder="raum://raum.app.link/tagged/ptag_01HGPPT35R3DYB7ZNAR30J3D17?name=Featured"
+            type="text"
+            {...register(path("link"), {})}
             errors={errors}
           />
         </div>

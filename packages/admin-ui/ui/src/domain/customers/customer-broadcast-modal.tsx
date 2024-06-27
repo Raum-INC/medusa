@@ -107,6 +107,7 @@ function CustomerBroadcastModal({
         image: url,
         message: general.message!,
         title: general.title!,
+        link: general.link!,
       },
       {
         onSuccess,
